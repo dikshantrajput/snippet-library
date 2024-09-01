@@ -97,7 +97,7 @@ export default class SnippetModel extends BaseModel {
 
         const { data, error } = await searchSnippetWithTagsQuery;
         if (error) {
-            throw Error("Error getting snippets");
+            throw Error("Error searching snippets");
         }
         type SnippetWithTagsDb = QueryData<typeof searchSnippetWithTagsQuery>;
         const rawSnippets = data as SnippetWithTagsDb;

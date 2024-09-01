@@ -4,13 +4,13 @@
 	import type { CodeSnippetInterface } from "$lib/types/snippet";
 	import { debounce, searchSnippets } from "$lib/helpers";
 	import SnippetModel from "../../modules/snippets/snippets.model";
-	import CodeSnippetSkeleton from "./skeletons/CodeSnippetSkeleton.svelte";
 	import SnippetCard from "./SnippetCard.svelte";
 	import { fly } from "svelte/transition";
 	import { clickOutside } from "$lib/actions/clickOutside";
 	import { onMount } from "svelte";
 	import SnippetLibrarySkeleton from "./skeletons/SnippetLibrarySkeleton.svelte";
 	import EmptyState from "./EmptyState.svelte";
+	import { showErrorToast } from "$lib/stores/toastStore";
 
 	let snippets: CodeSnippetInterface[] = [];
 
@@ -19,6 +19,7 @@
 	let selectedSnippet: CodeSnippetInterface | undefined = undefined;
 	let isCodeSnippetPreviewOpen = false;
 	let isLoading = true;
+	let isComponentLoaded = true;
 	let selectedTags: string[] = [];
 	let selectedLanguage = "";
 
@@ -36,21 +37,26 @@
 		selectedTags: string[],
 	) => {
 		isLoading = true;
-		filteredSnippets = await snippetModel.searchSnippets(
-			searchQuery,
-			selectedLanguage,
-			selectedTags,
-		);
-		// if I am getting 0 results from db dbSearch fn, use local dbSearch
-		if (!filteredSnippets.length) {
-			filteredSnippets = searchSnippets(
-				snippets,
+		try {
+			filteredSnippets = await snippetModel.searchSnippets(
 				searchQuery,
-				selectedTags,
 				selectedLanguage,
+				selectedTags,
 			);
+			// if I am getting 0 results from db dbSearch fn, use local dbSearch
+			if (!filteredSnippets.length) {
+				filteredSnippets = searchSnippets(
+					snippets,
+					searchQuery,
+					selectedTags,
+					selectedLanguage,
+				);
+			}
+		} catch (error) {
+			showErrorToast(String(error));
+		} finally {
+			isLoading = false;
 		}
-		isLoading = false;
 	};
 
 	const debouncedSearch = debounce(
@@ -58,7 +64,7 @@
 			dbSearch(searchQuery, selectedLanguage, selectedTags),
 		500,
 	);
-	$: debouncedSearch(searchQuery, selectedLanguage, selectedTags);
+	$: if(isComponentLoaded) debouncedSearch(searchQuery, selectedLanguage, selectedTags);
 
 	function handleSelectSnippetEvent(
 		event: CustomEvent<CodeSnippetInterface>,
@@ -103,26 +109,27 @@
 	}
 
 	const fetchSnippets = async () => {
-		snippets = await snippetModel.getSnippets();
-		console.log(snippets[0]);
-
-		allLanguages = [
-			...new Set(snippets.map((snippet) => snippet.language)),
-		];
-		allLanguages = allLanguages;
-		allTags = [...new Set(snippets.flatMap((snippet) => snippet.tags))];
+		try {
+			snippets = await snippetModel.getSnippets();
+			allLanguages = [
+				...new Set(snippets.map((snippet) => snippet.language)),
+			];
+			allLanguages = allLanguages;
+			allTags = [...new Set(snippets.flatMap((snippet) => snippet.tags))];
+			isComponentLoaded = true
+		} catch (error) {
+			showErrorToast(String(error));
+		}
 	};
-
-	$: console.log(filteredSnippets[0]);
 
 	onMount(fetchSnippets);
 </script>
 
-<div class="container mx-auto px-4 py-8">
-	<h1 class="text-3xl font-bold text-text dark:text-text-muted mb-8">
+<div class="container mx-auto sm:px-4 sm:py-8 py-4 px-0">
+	<h1 class="sm:text-3xl text-xl font-bold text-text dark:text-text-muted sm:mb-8 mb-4">
 		Code Snippet Library
 	</h1>
-	<div class="mb-6 flex gap-3">
+	<div class="mb-6 flex gap-3 sm:flex-row flex-col sm:text-base text-sm">
 		<input
 			type="text"
 			bind:value={searchQuery}
@@ -134,7 +141,7 @@
 				type="text"
 				bind:value={tagSearchQuery}
 				placeholder="Search with tags..."
-				class="flex-grow px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark text-text dark:text-text-muted border border-primary focus:outline-none focus:ring-2 focus:ring-primary-light"
+				class="px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark text-text dark:text-text-muted border border-primary focus:outline-none focus:ring-2 focus:ring-primary-light sm:min-w-[300px] w-full"
 			/>
 			{#if filteredTags.length > 0}
 				<ul
@@ -166,7 +173,7 @@
 		<div class="relative">
 			<select
 				bind:value={selectedLanguage}
-				class="px-4 py-2 pr-8 rounded-lg bg-background-light dark:bg-background-dark text-text dark:text-text-muted border border-primary focus:outline-none focus:ring-2 focus:ring-primary-light appearance-none"
+				class="px-4 py-2 pr-8 rounded-lg bg-background-light dark:bg-background-dark text-text dark:text-text-muted border border-primary focus:outline-none focus:ring-2 focus:ring-primary-light appearance-none  sm:min-w-max w-full"
 			>
 				<option value="">All Languages</option>
 				{#each allLanguages as language}
