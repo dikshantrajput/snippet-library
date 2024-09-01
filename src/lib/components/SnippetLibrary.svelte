@@ -19,7 +19,7 @@
 	let selectedSnippet: CodeSnippetInterface | undefined = undefined;
 	let isCodeSnippetPreviewOpen = false;
 	let isLoading = true;
-	let isComponentLoaded = true;
+	let isComponentLoaded = false;
 	let selectedTags: string[] = [];
 	let selectedLanguage = "";
 
@@ -36,6 +36,8 @@
 		selectedLanguage: string,
 		selectedTags: string[],
 	) => {
+		if(!isComponentLoaded) return
+		
 		isLoading = true;
 		try {
 			filteredSnippets = await snippetModel.searchSnippets(
@@ -64,8 +66,7 @@
 			dbSearch(searchQuery, selectedLanguage, selectedTags),
 		500,
 	);
-	$: if (isComponentLoaded)
-		debouncedSearch(searchQuery, selectedLanguage, selectedTags);
+	$: debouncedSearch(searchQuery, selectedLanguage, selectedTags);
 
 	function handleSelectSnippetEvent(
 		event: CustomEvent<CodeSnippetInterface>,
@@ -111,7 +112,9 @@
 
 	const fetchSnippets = async () => {
 		try {
+			isLoading = true;
 			snippets = await snippetModel.getSnippets();
+			filteredSnippets = snippets
 			allLanguages = [
 				...new Set(snippets.map((snippet) => snippet.language)),
 			];
@@ -120,6 +123,8 @@
 			isComponentLoaded = true;
 		} catch (error) {
 			showErrorToast(String(error));
+		}finally{
+			isLoading = false;
 		}
 	};
 
