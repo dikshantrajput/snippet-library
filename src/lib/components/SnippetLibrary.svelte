@@ -127,7 +127,7 @@
 
 <div class="container mx-auto sm:px-4 sm:py-8 py-4 px-0">
 	<h1 class="sm:text-3xl text-xl font-bold text-text dark:text-text-muted sm:mb-8 mb-4">
-		Code Snippet Library
+		Snippet Deck
 	</h1>
 	<div class="mb-6 flex gap-3 sm:flex-row flex-col sm:text-base text-sm">
 		<input
