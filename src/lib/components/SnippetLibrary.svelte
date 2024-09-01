@@ -12,6 +12,7 @@
 	import EmptyState from "./EmptyState.svelte";
 	import { showErrorToast } from "$lib/stores/toastStore";
 	import InfiniteScroll from "./InfiniteScroll.svelte";
+	import Loader from "./Loader.svelte";
 
 	// TODO: search pagination left
 	let snippets: CodeSnippetInterface[] = [];
@@ -21,6 +22,7 @@
 	let selectedSnippet: CodeSnippetInterface | undefined = undefined;
 	let isCodeSnippetPreviewOpen = false;
 	let isLoading = true;
+	let showLoader = false;
 	let selectedTags: string[] = [];
 	let selectedLanguage = "";
 
@@ -116,6 +118,7 @@
 
 	const fetchSnippets = async (from: number = 0, to: number = pageSize) => {
 		try {
+			showLoader = true;
 			isLoading = true;
 			snippets = await snippetModel.getSnippets(from, to - 1);
 			filteredSnippets = snippets;
@@ -127,35 +130,44 @@
 			showErrorToast(String(error));
 		} finally {
 			isLoading = false;
+			showLoader = false;
 		}
 	};
 
 	onMount(fetchSnippets);
 
 	const handleLoadMoreSnippets = async () => {
-		page++;
-		const newSnippets = await snippetModel.getSnippets(
-			page * pageSize,
-			page * pageSize + pageSize - 1,
-		);
-		snippets = [...snippets, ...newSnippets];
+		try {
+			showLoader = true;
+			page++;
+			const newSnippets = await snippetModel.getSnippets(
+				page * pageSize,
+				page * pageSize + pageSize - 1,
+			);
+			snippets = [...snippets, ...newSnippets];
 
-		filteredSnippets = [...filteredSnippets, ...newSnippets];
+			filteredSnippets = [...filteredSnippets, ...newSnippets];
 
-		allLanguages = [
-			...new Set(snippets.map((snippet) => snippet.language)),
-		];
-		allTags = [...new Set(snippets.flatMap((snippet) => snippet.tags))];
+			allLanguages = [
+				...new Set(snippets.map((snippet) => snippet.language)),
+			];
+			allTags = [...new Set(snippets.flatMap((snippet) => snippet.tags))];
+		} catch (error) {
+			showErrorToast(String(error));
+		} finally {
+			showLoader = false;
+		}
 	};
 </script>
 
-<div
-	class="container mx-auto sm:px-4 sm:py-8 py-4 px-0"
->
+<div class="container mx-auto sm:px-4 sm:py-8 py-4 px-0">
 	<h1
-		class="sm:text-3xl text-xl font-bold text-text dark:text-text-muted sm:mb-8 mb-4 px-5"
+		class="flex gap-4 sm:text-3xl text-xl font-bold text-text dark:text-text-muted sm:mb-8 mb-4 px-5"
 	>
 		Snippet Cache
+		{#if showLoader}
+			<Loader />
+		{/if}
 	</h1>
 	<div class="mb-6 flex gap-3 sm:flex-row flex-col sm:text-base text-sm px-5">
 		<input
@@ -252,7 +264,9 @@
 			message="If you want to contribute. Please go to github and submit your snippet. That might help someone."
 		/>
 	{:else}
-		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[calc(100vh-300px)] overflow-y-scroll px-5">
+		<div
+			class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[calc(100vh-300px)] overflow-y-scroll px-5"
+		>
 			{#each filteredSnippets as snippet (snippet.id)}
 				<SnippetCard {snippet} on:select={handleSelectSnippetEvent} />
 			{/each}
