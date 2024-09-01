@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   private: {
     Tables: {
+      snippet_suggestions: {
+        Row: {
+          category: string | null
+          code: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          language: string | null
+          tags: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          code?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          language?: string | null
+          tags?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          code?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          language?: string | null
+          tags?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       snippet_tags: {
         Row: {
           id: string | null

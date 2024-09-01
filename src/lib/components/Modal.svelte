@@ -6,6 +6,7 @@
 	export let isOpen: boolean = false;
 	export let closeOnOverlayClick: boolean = true;
 	export let containerClasses = "";
+	export let crossIconClasses = "";
 
 	const dispatch = createEventDispatcher();
 
@@ -50,7 +51,7 @@
 			transition:scale|local
 		>
 			<button
-				class="absolute top-2 right-2 focus:outline-none text-3xl text-gray-200"
+				class="absolute top-2 right-2 focus:outline-none text-3xl text-gray-200 {crossIconClasses}"
 				on:click={closeModal}
 				aria-label="Close"
 			>

@@ -64,7 +64,8 @@
 			dbSearch(searchQuery, selectedLanguage, selectedTags),
 		500,
 	);
-	$: if(isComponentLoaded) debouncedSearch(searchQuery, selectedLanguage, selectedTags);
+	$: if (isComponentLoaded)
+		debouncedSearch(searchQuery, selectedLanguage, selectedTags);
 
 	function handleSelectSnippetEvent(
 		event: CustomEvent<CodeSnippetInterface>,
@@ -116,7 +117,7 @@
 			];
 			allLanguages = allLanguages;
 			allTags = [...new Set(snippets.flatMap((snippet) => snippet.tags))];
-			isComponentLoaded = true
+			isComponentLoaded = true;
 		} catch (error) {
 			showErrorToast(String(error));
 		}
@@ -126,7 +127,9 @@
 </script>
 
 <div class="container mx-auto sm:px-4 sm:py-8 py-4 px-0">
-	<h1 class="sm:text-3xl text-xl font-bold text-text dark:text-text-muted sm:mb-8 mb-4">
+	<h1
+		class="sm:text-3xl text-xl font-bold text-text dark:text-text-muted sm:mb-8 mb-4"
+	>
 		Snippet Cache
 	</h1>
 	<div class="mb-6 flex gap-3 sm:flex-row flex-col sm:text-base text-sm">
@@ -173,7 +176,7 @@
 		<div class="relative">
 			<select
 				bind:value={selectedLanguage}
-				class="px-4 py-2 pr-8 rounded-lg bg-background-light dark:bg-background-dark text-text dark:text-text-muted border border-primary focus:outline-none focus:ring-2 focus:ring-primary-light appearance-none  sm:min-w-max w-full"
+				class="px-4 py-2 pr-8 rounded-lg bg-background-light dark:bg-background-dark text-text dark:text-text-muted border border-primary focus:outline-none focus:ring-2 focus:ring-primary-light appearance-none sm:min-w-max w-full"
 			>
 				<option value="">All Languages</option>
 				{#each allLanguages as language}

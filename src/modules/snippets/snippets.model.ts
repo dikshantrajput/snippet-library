@@ -1,5 +1,5 @@
 import BaseModel from "$lib/base.model";
-import type { CodeSnippetInterface } from "$lib/types/snippet";
+import type { CodeSnippetInterface, CreateSnippetDbInterface } from "$lib/types/snippet";
 import { type QueryData } from "@supabase/supabase-js";
 
 interface SnippetWithTags {
@@ -35,7 +35,6 @@ export default class SnippetModel extends BaseModel {
 
     async getSnippets(): Promise<CodeSnippetInterface[]> {
         const snippetWithTagsQuery = this.supabasePublicClient.from("snippets")
-            .select("a:id")
             .select("*,tags:snippet_tags(tag:tags(id,name))");
 
         type SnippetWithTagsDb = QueryData<typeof snippetWithTagsQuery>;
@@ -103,5 +102,13 @@ export default class SnippetModel extends BaseModel {
         const rawSnippets = data as SnippetWithTagsDb;
 
         return this.prepareSnippetsForView(rawSnippets);
+    }
+
+    async createSnippetSuggestion(payload: CreateSnippetDbInterface){
+        const { error } = await this.supabasePublicClient.from("snippet_suggestions").insert(payload);
+
+        if (error) {
+            throw Error("Error creating snippet suggestion");
+        }
     }
 }
