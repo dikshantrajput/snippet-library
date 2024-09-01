@@ -122,108 +122,106 @@
 	<h1 class="text-3xl font-bold text-text dark:text-text-muted mb-8">
 		Code Snippet Library
 	</h1>
-	{#if isLoading}
-		<SnippetLibrarySkeleton />
-	{:else}
-		<div class="mb-6 flex gap-3">
+	<div class="mb-6 flex gap-3">
+		<input
+			type="text"
+			bind:value={searchQuery}
+			placeholder="Search snippets..."
+			class="w-full px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark text-text dark:text-text-muted border border-primary focus:outline-none focus:ring-2 focus:ring-primary-light"
+		/>
+		<div class="relative">
 			<input
 				type="text"
-				bind:value={searchQuery}
-				placeholder="Search snippets..."
-				class="w-full px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark text-text dark:text-text-muted border border-primary focus:outline-none focus:ring-2 focus:ring-primary-light"
+				bind:value={tagSearchQuery}
+				placeholder="Search with tags..."
+				class="flex-grow px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark text-text dark:text-text-muted border border-primary focus:outline-none focus:ring-2 focus:ring-primary-light"
 			/>
-			<div class="relative">
-				<input
-					type="text"
-					bind:value={tagSearchQuery}
-					placeholder="Search with tags..."
-					class="flex-grow px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark text-text dark:text-text-muted border border-primary focus:outline-none focus:ring-2 focus:ring-primary-light"
-				/>
-				{#if filteredTags.length > 0}
-					<ul
-						class="absolute bg-background-light dark:bg-background-dark border border-primary rounded-lg shadow-lg mt-1 w-full max-h-64 overflow-y-auto z-10"
-						use:clickOutside={() => {
-							tagSearchQuery = "";
-						}}
-					>
-						{#each filteredTags as tag}
-							<li class="cursor-pointer hover:bg-primary-light">
-								<button
-									on:click={() => toggleTagSelection(tag)}
-									class="px-4 py-2 w-full text-start h-full"
-								>
-									<input
-										type="checkbox"
-										checked={selectedTags.includes(tag)}
-										readOnly
-										class="mr-2 !bg-red-100"
-									/>
-									{tag}
-								</button>
-							</li>
-						{/each}
-					</ul>
-				{/if}
-			</div>
-
-			<div class="relative">
-				<select
-					bind:value={selectedLanguage}
-					class="px-4 py-2 pr-8 rounded-lg bg-background-light dark:bg-background-dark text-text dark:text-text-muted border border-primary focus:outline-none focus:ring-2 focus:ring-primary-light appearance-none"
+			{#if filteredTags.length > 0}
+				<ul
+					class="absolute bg-background-light dark:bg-background-dark border border-primary rounded-lg shadow-lg mt-1 w-full max-h-64 overflow-y-auto z-10"
+					use:clickOutside={() => {
+						tagSearchQuery = "";
+					}}
 				>
-					<option value="">All Languages</option>
-					{#each allLanguages as language}
-						<option value={language}>{language}</option>
+					{#each filteredTags as tag}
+						<li class="cursor-pointer hover:bg-primary-light">
+							<button
+								on:click={() => toggleTagSelection(tag)}
+								class="px-4 py-2 w-full text-start h-full"
+							>
+								<input
+									type="checkbox"
+									checked={selectedTags.includes(tag)}
+									readOnly
+									class="mr-2 !bg-red-100"
+								/>
+								{tag}
+							</button>
+						</li>
 					{/each}
-				</select>
-				<div
-					class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none"
+				</ul>
+			{/if}
+		</div>
+
+		<div class="relative">
+			<select
+				bind:value={selectedLanguage}
+				class="px-4 py-2 pr-8 rounded-lg bg-background-light dark:bg-background-dark text-text dark:text-text-muted border border-primary focus:outline-none focus:ring-2 focus:ring-primary-light appearance-none"
+			>
+				<option value="">All Languages</option>
+				{#each allLanguages as language}
+					<option value={language}>{language}</option>
+				{/each}
+			</select>
+			<div
+				class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none"
+			>
+				<svg
+					class="w-4 h-4 text-gray-500 dark:text-gray-300"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+					xmlns="http://www.w3.org/2000/svg"
 				>
-					<svg
-						class="w-4 h-4 text-gray-500 dark:text-gray-300"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M19 9l-7 7-7-7"
-						></path>
-					</svg>
-				</div>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M19 9l-7 7-7-7"
+					></path>
+				</svg>
 			</div>
 		</div>
-		<div class="flex flex-wrap gap-2 mb-2">
-			{#each selectedTags as tag (tag)}
-				<span
-					class="px-2 py-1 bg-primary text-background rounded-full text-sm flex items-center"
-					transition:fly
+	</div>
+	<div class="flex flex-wrap gap-2 mb-2">
+		{#each selectedTags as tag (tag)}
+			<span
+				class="px-2 py-1 bg-primary text-background rounded-full text-sm flex items-center"
+				transition:fly
+			>
+				{tag}
+				<button
+					on:click={() => removeTag(tag)}
+					class="ml-2 focus:outline-none"
 				>
-					{tag}
-					<button
-						on:click={() => removeTag(tag)}
-						class="ml-2 focus:outline-none"
-					>
-						&times;
-					</button>
-				</span>
+					&times;
+				</button>
+			</span>
+		{/each}
+	</div>
+	{#if isLoading}
+		<SnippetLibrarySkeleton />
+	{:else if filteredSnippets.length === 0}
+		<EmptyState
+			title="No snippets"
+			message="If you want to contribute. Please go to github and submit your snippet. That might help someone."
+		/>
+	{:else}
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+			{#each filteredSnippets as snippet (snippet.id)}
+				<SnippetCard {snippet} on:select={handleSelectSnippetEvent} />
 			{/each}
 		</div>
-		{#if filteredSnippets.length === 0}
-			<EmptyState title="No snippets" message="If you want to contribute. Please go to github and submit your snippet. That might help someone." />
-		{:else}
-			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-				{#each filteredSnippets as snippet (snippet.id)}
-					<SnippetCard
-						{snippet}
-						on:select={handleSelectSnippetEvent}
-					/>
-				{/each}
-			</div>
-		{/if}
 	{/if}
 </div>
 
