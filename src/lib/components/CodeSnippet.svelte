@@ -3,7 +3,7 @@
   import Prism from "prismjs";
   import "prismjs/themes/prism-tomorrow.css";
   import type { CodeSnippetInterface } from "$lib/types/snippet";
-    import { showErrorToast, showSuccessToast } from "$lib/stores/toastStore";
+  import { showErrorToast, showSuccessToast } from "$lib/stores/toastStore";
 
   export let codeSnippet: CodeSnippetInterface;
 
@@ -19,13 +19,13 @@
   });
 
   async function copyToClipboard() {
-    try{
+    try {
       await navigator.clipboard.writeText(codeSnippet.code);
       copied = true;
       setTimeout(() => (copied = false), 2000);
-      showSuccessToast("Snippet copied")
-    }catch{ 
-      showErrorToast("Error copying code")
+      showSuccessToast("Snippet copied");
+    } catch {
+      showErrorToast("Error copying code");
     }
   }
 </script>
@@ -33,7 +33,7 @@
 <div
   class="bg-background-light dark:bg-background-dark rounded-lg shadow-lg p-4 h-full"
 >
-  <div class="flex justify-between items-baseline mb-2 ">
+  <div class="flex justify-between items-baseline mb-2">
     <h3 class="text-lg font-semibold text-text dark:text-text-muted">
       {codeSnippet.title}
     </h3>
@@ -45,7 +45,7 @@
     </button>
   </div>
   <div
-    class="code-block rounded bg-background-dark dark:bg-background p-4 overflow-x-auto max-h-[80vh] overflow-y-scroll"
+    class="code-block rounded bg-background-dark dark:bg-background p-4 overflow-auto max-h-[80vh]"
   >
     {@html highlightedCode}
   </div>

@@ -45,3 +45,29 @@
     --color-warning: 249 115 22;
   }
 }
+
+/* Minimalistic Dark Theme Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px; /* For horizontal scrollbars */
+}
+
+::-webkit-scrollbar-track {
+  background: #1e1e1e; /* Track color */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #3a3a3a; /* Thumb color */
+  border-radius: 10px; /* Rounded corners */
+  border: 2px solid #1e1e1e; /* Space around thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #565656; /* Thumb color on hover */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3a3a3a #1e1e1e; /* Thumb and track colors */
+}

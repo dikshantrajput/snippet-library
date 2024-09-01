@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { browser } from "$app/environment";
   import { createEventDispatcher } from "svelte";
   import { scale } from "svelte/transition";
 
@@ -17,6 +18,19 @@
   function closeModal() {
     isOpen = false;
     dispatch("close");
+  }
+
+  function disableBodyScroll(disable: boolean) {
+    if(browser){
+      document.body.style.overflow = disable ? "hidden" : "";
+    }
+  }
+
+  // Reactively disable or enable body scroll based on modal open state
+  $: if (isOpen) {
+    disableBodyScroll(true);
+  } else {
+    disableBodyScroll(false);
   }
 </script>
 

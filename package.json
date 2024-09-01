@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"dev": "vite dev",
+		"dev": "vite dev --port 5555",
 		"build": "vite build",
 		"preview": "vite preview",
 		"test": "npm run test:integration && npm run test:unit",
@@ -12,7 +12,8 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"test:integration": "playwright test",
-		"test:unit": "vitest"
+		"test:unit": "vitest",
+		"fetch-db-types": "npx supabase gen types typescript --project-id ufjnyaqtbqkmjpvfvylj --schema private > src/lib/types/supabase.database.ts"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.28.1",
@@ -45,6 +46,8 @@
 	"type": "module",
 	"dependencies": {
 		"@supabase/supabase-js": "^2.44.3",
+		"@types/axios": "^0.14.0",
+		"axios": "^1.7.5",
 		"prismjs": "^1.29.0",
 		"svelte-sonner": "^0.3.21"
 	}

@@ -4,8 +4,8 @@
   import { ThemesEnum } from "$lib/types/core";
   import ThemeToggler from "$lib/components/ThemeToggler.svelte";
   import { THEME_LOCALSTORAGE_KEY } from "$lib/constants";
-    import { Toaster } from "svelte-sonner";
-    import { themeStore } from "$lib/stores/themeStore";
+  import { Toaster } from "svelte-sonner";
+  import { themeStore } from "$lib/stores/themeStore";
 
   onMount(() => {
     const savedTheme = localStorage.getItem(
@@ -20,13 +20,13 @@
 </script>
 
 <Toaster
-	theme="light"
-	expand
-	richColors
-	closeButton
-	duration={2500}
-	position="bottom-center"
-	visibleToasts={5}
+  theme="light"
+  expand
+  richColors
+  closeButton
+  duration={2500}
+  position="bottom-center"
+  visibleToasts={5}
 />
 
 <div class="min-h-screen bg-background text-text">
