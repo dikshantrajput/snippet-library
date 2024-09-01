@@ -7,6 +7,7 @@
 	import CodeSnippetSkeleton from "./skeletons/CodeSnippetSkeleton.svelte";
 	import SnippetCard from "./SnippetCard.svelte";
 	import { fly } from "svelte/transition";
+	import { clickOutside } from "$lib/actions/clickOutside";
 
 	export let snippets: CodeSnippetInterface[];
 
@@ -19,7 +20,23 @@
 	let selectedLanguage = "";
 
 	let allLanguages: string[] = [];
-	let allTags: string[] = ["abc"];
+	let allTags: string[] = [
+		"abc",
+		"abcd",
+		"abcasd",
+		"abcrt",
+		"abcdqew",
+		"abcasdrtye",
+		"abcqw",
+		"abcddfs",
+		"abcasdqewe",
+		"abcasdafsdf",
+		"abcdtrt",
+		"abcasdppojlk",
+	];
+
+	let tagSearchQuery = "";
+	let filteredTags: string[] = [];
 
 	const snippetModel = new SnippetModel();
 
@@ -50,6 +67,7 @@
 	function closeDetailView() {
 		selectedSnippet = undefined;
 	}
+
 	function toggleTag(tag: string) {
 		if (selectedTags.includes(tag)) {
 			selectedTags = selectedTags.filter((t) => t !== tag);
@@ -66,12 +84,29 @@
 		selectedTags = selectedTags.filter((t) => t !== tag);
 	}
 
-	function handleTagInput(event: Event) {
-		const input = event.target as HTMLInputElement;
-		const value = input.value.trim();
-		if (value && !selectedTags.includes(value)) {
-			selectedTags = [...selectedTags, value];
-			input.value = "";
+	function handleTagInput(tagSearchQuery: string) {
+		if (tagSearchQuery) {
+			filteredTags = allTags.filter((tag) =>
+				tag.toLowerCase().includes(tagSearchQuery.toLowerCase()),
+			);
+		} else {
+			filteredTags = [];
+		}
+	}
+
+	$: handleTagInput(tagSearchQuery.trim());
+
+	function toggleTagSelection(tag: string) {
+		if (selectedTags.includes(tag)) {
+			removeTag(tag);
+		} else {
+			selectTag(tag);
+		}
+	}
+
+	function selectTag(tag: string) {
+		if (!selectedTags.includes(tag)) {
+			selectedTags = [...selectedTags, tag];
 		}
 	}
 </script>
@@ -88,12 +123,42 @@
 			placeholder="Search snippets..."
 			class="w-full px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark text-text dark:text-text-muted border border-primary focus:outline-none focus:ring-2 focus:ring-primary-light"
 		/>
-		<input
-			type="text"
-			placeholder="Search with tags..."
-			on:keydown={(e) => e.key === "Enter" && handleTagInput(e)}
-			class="flex-grow px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark text-text dark:text-text-muted border border-primary focus:outline-none focus:ring-2 focus:ring-primary-light"
-		/>
+		<div class="relative">
+			<input
+				type="text"
+				bind:value={tagSearchQuery}
+				placeholder="Search with tags..."
+				class="flex-grow px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark text-text dark:text-text-muted border border-primary focus:outline-none focus:ring-2 focus:ring-primary-light"
+			/>
+			{#if filteredTags.length > 0}
+				<ul
+					class="absolute bg-background-light dark:bg-background-dark border border-primary rounded-lg shadow-lg mt-1 w-full max-h-64 overflow-y-auto z-10"
+					use:clickOutside={() => {
+						tagSearchQuery = "";
+					}}
+				>
+					{#each filteredTags as tag}
+						<li
+							class="px-4 py-2 cursor-pointer hover:bg-primary-light"
+						>
+							<button
+								on:click={() => toggleTagSelection(tag)}
+								class="w-full text-start"
+							>
+								<input
+									type="checkbox"
+									checked={selectedTags.includes(tag)}
+									readOnly
+									class="mr-2"
+								/>
+								{tag}
+							</button>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</div>
+
 		<div class="relative">
 			<select
 				bind:value={selectedLanguage}
@@ -124,23 +189,22 @@
 			</div>
 		</div>
 	</div>
-	<div class="my-4">
-		<div class="flex flex-wrap gap-2">
-			{#each selectedTags as tag (tag)}
-				<span
-					class="px-2 py-1 bg-primary text-background rounded-full text-sm flex items-center"
-					transition:fly
+
+	<div class="flex flex-wrap gap-2 mb-2">
+		{#each selectedTags as tag (tag)}
+			<span
+				class="px-2 py-1 bg-primary text-background rounded-full text-sm flex items-center"
+				transition:fly
+			>
+				{tag}
+				<button
+					on:click={() => removeTag(tag)}
+					class="ml-2 focus:outline-none"
 				>
-					{tag}
-					<button
-						on:click={() => removeTag(tag)}
-						class="ml-2 focus:outline-none"
-					>
-						&times;
-					</button>
-				</span>
-			{/each}
-		</div>
+					&times;
+				</button>
+			</span>
+		{/each}
 	</div>
 
 	{#if isLoading}
