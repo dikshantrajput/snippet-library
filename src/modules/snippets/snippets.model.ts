@@ -2,28 +2,32 @@ import BaseModel from "$lib/base.model";
 import type { CodeSnippetInterface } from "$lib/types/snippet";
 import { type QueryData } from "@supabase/supabase-js";
 
+interface SnippetWithTags {
+    category: string | null;
+    code: string;
+    created_at: string | null;
+    description: string | null;
+    id: string;
+    language: string;
+    title: string;
+    tags: string[];
+}
+
 export default class SnippetModel extends BaseModel {
     constructor() {
         super();
-        this.getSnippets = this.getSnippets.bind(this);
     }
 
-    private prepareSnippetsForView<T>(rawSnippets: T) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const snippetWithTagsQuery = this.supabasePublicClient.from("snippets")
-            .select("a:id")
-            .select("*,tags:snippet_tags(tag:tags(id,name))");
-
-        type SnippetWithTagsDb = QueryData<typeof snippetWithTagsQuery>;
-        return (rawSnippets as SnippetWithTagsDb).map((snippet) => ({
+    private prepareSnippetsForView<T extends SnippetWithTags[]>(
+        rawSnippets: T,
+    ) {
+        return rawSnippets.map((snippet) => ({
             id: snippet.id,
             title: snippet.title,
             description: snippet.description || "",
             language: snippet.language,
             category: snippet.category || "",
-            tags: (snippet.tags || [])?.map((snippetTag) =>
-                snippetTag.tag?.name
-            ).filter((tag) => tag !== undefined),
+            tags: snippet.tags || [],
             code: snippet.code,
             createdAt: snippet.created_at || "",
         }));
@@ -43,18 +47,52 @@ export default class SnippetModel extends BaseModel {
         }
 
         const rawSnippets = data as SnippetWithTagsDb;
+        const rawSnippetsWithTagsStructure: SnippetWithTags[] = rawSnippets.map(
+            (snippet) => {
+                const tags = (snippet.tags || []).map((tag) => tag?.tag?.name)
+                    .filter((tag) => tag !== undefined);
+                return {
+                    ...snippet,
+                    tags,
+                };
+            },
+        );
 
-        return this.prepareSnippetsForView<SnippetWithTagsDb>(rawSnippets);
+        return this.prepareSnippetsForView(rawSnippetsWithTagsStructure);
     }
 
-    async searchSnippets(searchQuery: string): Promise<CodeSnippetInterface[]> {
+    async searchSnippets(
+        searchQuery: string,
+        language: string,
+        tags?: string[],
+    ): Promise<CodeSnippetInterface[]> {
+        const searchFilterQuery: {
+            limit_val: number;
+            offset_val: number;
+            search_text: string;
+            lang?: string;
+            tag_names?: string[];
+        } = {
+            search_text: "",
+            limit_val: 100,
+            offset_val: 0,
+        };
+
+        if (searchQuery) {
+            searchFilterQuery["search_text"] = searchQuery;
+        }
+
+        if (language) {
+            searchFilterQuery["lang"] = language;
+        }
+
+        if (tags && tags.length) {
+            searchFilterQuery["tag_names"] = tags;
+        }
+
         const searchSnippetWithTagsQuery = this.supabasePublicClient.rpc(
             "search_snippets",
-            {
-                search_text: searchQuery,
-                limit_val: 100,
-                offset_val: 0,
-            },
+            searchFilterQuery,
         );
 
         const { data, error } = await searchSnippetWithTagsQuery;
@@ -63,6 +101,7 @@ export default class SnippetModel extends BaseModel {
         }
         type SnippetWithTagsDb = QueryData<typeof searchSnippetWithTagsQuery>;
         const rawSnippets = data as SnippetWithTagsDb;
-        return this.prepareSnippetsForView<SnippetWithTagsDb>(rawSnippets);
+
+        return this.prepareSnippetsForView(rawSnippets);
     }
 }
