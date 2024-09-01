@@ -11,7 +11,9 @@
 	import SnippetLibrarySkeleton from "./skeletons/SnippetLibrarySkeleton.svelte";
 	import EmptyState from "./EmptyState.svelte";
 	import { showErrorToast } from "$lib/stores/toastStore";
+	import InfiniteScroll from "./InfiniteScroll.svelte";
 
+	// TODO: search pagination left
 	let snippets: CodeSnippetInterface[] = [];
 
 	let searchQuery = "";
@@ -19,7 +21,6 @@
 	let selectedSnippet: CodeSnippetInterface | undefined = undefined;
 	let isCodeSnippetPreviewOpen = false;
 	let isLoading = true;
-	let isComponentLoaded = false;
 	let selectedTags: string[] = [];
 	let selectedLanguage = "";
 
@@ -29,6 +30,9 @@
 	let tagSearchQuery = "";
 	let filteredTags: string[] = [];
 
+	let page = 0;
+	let pageSize = 10;
+
 	const snippetModel = new SnippetModel();
 
 	const dbSearch = async (
@@ -36,8 +40,8 @@
 		selectedLanguage: string,
 		selectedTags: string[],
 	) => {
-		if(!isComponentLoaded) return
-		
+		if (!searchQuery && !selectedLanguage && !selectedTags.length) return;
+
 		isLoading = true;
 		try {
 			filteredSnippets = await snippetModel.searchSnippets(
@@ -110,34 +114,50 @@
 		}
 	}
 
-	const fetchSnippets = async () => {
+	const fetchSnippets = async (from: number = 0, to: number = pageSize) => {
 		try {
 			isLoading = true;
-			snippets = await snippetModel.getSnippets();
-			filteredSnippets = snippets
+			snippets = await snippetModel.getSnippets(from, to - 1);
+			filteredSnippets = snippets;
 			allLanguages = [
 				...new Set(snippets.map((snippet) => snippet.language)),
 			];
-			allLanguages = allLanguages;
 			allTags = [...new Set(snippets.flatMap((snippet) => snippet.tags))];
-			isComponentLoaded = true;
 		} catch (error) {
 			showErrorToast(String(error));
-		}finally{
+		} finally {
 			isLoading = false;
 		}
 	};
 
 	onMount(fetchSnippets);
+
+	const handleLoadMoreSnippets = async () => {
+		page++;
+		const newSnippets = await snippetModel.getSnippets(
+			page * pageSize,
+			page * pageSize + pageSize - 1,
+		);
+		snippets = [...snippets, ...newSnippets];
+
+		filteredSnippets = [...filteredSnippets, ...newSnippets];
+
+		allLanguages = [
+			...new Set(snippets.map((snippet) => snippet.language)),
+		];
+		allTags = [...new Set(snippets.flatMap((snippet) => snippet.tags))];
+	};
 </script>
 
-<div class="container mx-auto sm:px-4 sm:py-8 py-4 px-0">
+<div
+	class="container mx-auto sm:px-4 sm:py-8 py-4 px-0"
+>
 	<h1
-		class="sm:text-3xl text-xl font-bold text-text dark:text-text-muted sm:mb-8 mb-4"
+		class="sm:text-3xl text-xl font-bold text-text dark:text-text-muted sm:mb-8 mb-4 px-5"
 	>
 		Snippet Cache
 	</h1>
-	<div class="mb-6 flex gap-3 sm:flex-row flex-col sm:text-base text-sm">
+	<div class="mb-6 flex gap-3 sm:flex-row flex-col sm:text-base text-sm px-5">
 		<input
 			type="text"
 			bind:value={searchQuery}
@@ -208,7 +228,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="flex flex-wrap gap-2 mb-2">
+	<div class="flex flex-wrap gap-2 mb-2 px-5">
 		{#each selectedTags as tag (tag)}
 			<span
 				class="px-2 py-1 bg-primary text-background rounded-full text-sm flex items-center"
@@ -232,10 +252,15 @@
 			message="If you want to contribute. Please go to github and submit your snippet. That might help someone."
 		/>
 	{:else}
-		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[calc(100vh-300px)] overflow-y-scroll px-5">
 			{#each filteredSnippets as snippet (snippet.id)}
 				<SnippetCard {snippet} on:select={handleSelectSnippetEvent} />
 			{/each}
+			<InfiniteScroll
+				hasMore={true}
+				threshold={100}
+				on:loadMore={handleLoadMoreSnippets}
+			/>
 		</div>
 	{/if}
 </div>
