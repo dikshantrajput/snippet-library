@@ -51,15 +51,6 @@
 				selectedLanguage,
 				selectedTags,
 			);
-			// if I am getting 0 results from db dbSearch fn, use local search
-			if (!filteredSnippets.length) {
-				filteredSnippets = searchSnippets(
-					snippets,
-					searchQuery,
-					selectedTags,
-					selectedLanguage,
-				);
-			}
 		} catch (error) {
 			showErrorToast(String(error));
 		} finally {
@@ -170,7 +161,7 @@
 		{/if}
 	</h1>
 	<div class="mb-6 flex gap-3 sm:flex-row flex-col sm:text-base text-sm px-5">
-		<input
+		<!-- <input
 			type="text"
 			bind:value={searchQuery}
 			placeholder="Search snippets..."
@@ -208,7 +199,7 @@
 					{/each}
 				</ul>
 			{/if}
-		</div>
+		</div> -->
 
 		<div class="relative">
 			<select
