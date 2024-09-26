@@ -51,7 +51,7 @@
 				selectedLanguage,
 				selectedTags,
 			);
-			// if I am getting 0 results from db dbSearch fn, use local dbSearch
+			// if I am getting 0 results from db dbSearch fn, use local search
 			if (!filteredSnippets.length) {
 				filteredSnippets = searchSnippets(
 					snippets,

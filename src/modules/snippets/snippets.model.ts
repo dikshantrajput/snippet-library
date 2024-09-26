@@ -79,7 +79,7 @@ export default class SnippetModel extends BaseModel {
             tag_names?: string[];
         } = {
             search_text: "",
-            limit_val: 100,
+            limit_val: 10,
             offset_val: 0,
         };
 
