@@ -15,7 +15,7 @@ export type Database = {
           code: string | null
           created_at: string | null
           description: string | null
-          id: string | null
+          id: string
           language: string | null
           tags: string | null
           title: string | null
@@ -26,7 +26,7 @@ export type Database = {
           code?: string | null
           created_at?: string | null
           description?: string | null
-          id?: string | null
+          id?: string
           language?: string | null
           tags?: string | null
           title?: string | null
@@ -37,7 +37,7 @@ export type Database = {
           code?: string | null
           created_at?: string | null
           description?: string | null
-          id?: string | null
+          id?: string
           language?: string | null
           tags?: string | null
           title?: string | null
