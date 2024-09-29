@@ -13,7 +13,7 @@
 		"format": "prettier --write .",
 		"test:integration": "playwright test",
 		"test:unit": "vitest",
-		"fetch-db-types": "npx supabase gen types typescript --project-id ufjnyaqtbqkmjpvfvylj --schema private > src/lib/types/supabase.database.ts"
+		"fetch-db-types": "npx supabase gen types typescript --project-id ufjnyaqtbqkmjpvfvylj --schema private,public,auth > src/lib/types/supabase.database.ts"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.28.1",
